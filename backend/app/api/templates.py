@@ -5,10 +5,13 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
 from pathlib import Path
 import os
+import logging
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
-TEMPLATES_DIR = Path(__file__).parent.parent.parent / "templates"
+# Resolve templates dir relative to app root (works in Docker: /app/templates)
+TEMPLATES_DIR = Path(__file__).resolve().parent.parent.parent / "templates"
 
 AVAILABLE_TEMPLATES = {
     "rally_epics": "rally_epics.csv",
@@ -22,13 +25,20 @@ AVAILABLE_TEMPLATES = {
 async def list_templates():
     """List all available template files"""
     templates = []
+    if not TEMPLATES_DIR.exists():
+        logger.warning("Templates directory not found: %s", TEMPLATES_DIR)
+        return {"templates": []}
     for key, filename in AVAILABLE_TEMPLATES.items():
         filepath = TEMPLATES_DIR / filename
         if filepath.exists():
+            try:
+                size = os.path.getsize(filepath)
+            except OSError:
+                size = 0
             templates.append({
                 "id": key,
                 "filename": filename,
-                "size": os.path.getsize(filepath),
+                "size": size,
                 "description": get_template_description(key)
             })
     return {"templates": templates}

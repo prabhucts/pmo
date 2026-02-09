@@ -40,11 +40,12 @@ const Templates: React.FC = () => {
   const fetchTemplates = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/templates/list');
-      setTemplates(response.data.templates);
       setError(null);
+      const response = await api.get('/templates/list');
+      setTemplates(response.data?.templates ?? []);
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to load templates');
+      const msg = err.response?.data?.detail ?? err.message ?? 'Backend unreachable (check CORS or API URL)';
+      setError(typeof msg === 'string' ? msg : 'Failed to load templates');
     } finally {
       setLoading(false);
     }

@@ -31,7 +31,7 @@ gcloud run deploy pmo-backend \
   --platform managed \
   --region "$REGION" \
   --allow-unauthenticated \
-  --set-env-vars "OPENAI_API_KEY=${OPENAI_API_KEY},SECRET_KEY=${SECRET_KEY},ALLOWED_ORIGINS=https://pmo-mng-tool.com,https://localhost:3000" \
+  --set-env-vars "OPENAI_API_KEY=${OPENAI_API_KEY},SECRET_KEY=${SECRET_KEY},ALLOWED_ORIGINS=*" \
   --memory 2Gi \
   --cpu 2 \
   --timeout 300

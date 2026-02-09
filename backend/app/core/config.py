@@ -31,10 +31,13 @@ class Settings(BaseSettings):
     
     @property
     def allowed_origins_list(self) -> List[str]:
-        """Parse ALLOWED_ORIGINS as list"""
+        """Parse ALLOWED_ORIGINS as list. Use ['*'] to allow any origin (e.g. Cloud Run frontend URL)."""
         if isinstance(self.ALLOWED_ORIGINS, str):
-            return [origin.strip() for origin in self.ALLOWED_ORIGINS.split(",")]
-        return self.ALLOWED_ORIGINS
+            origins = [o.strip() for o in self.ALLOWED_ORIGINS.split(",") if o.strip()]
+            if "*" in origins or self.ALLOWED_ORIGINS.strip() == "*":
+                return ["*"]
+            return origins
+        return list(self.ALLOWED_ORIGINS) if self.ALLOWED_ORIGINS else []
     
     # File Upload
     MAX_UPLOAD_SIZE: int = 52428800  # 50MB

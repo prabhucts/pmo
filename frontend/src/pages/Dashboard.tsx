@@ -29,12 +29,17 @@ export default function Dashboard() {
     loadDashboard();
   }, []);
 
+  const [error, setError] = useState<string | null>(null);
+
   const loadDashboard = async () => {
     try {
+      setError(null);
       const summary = await getDashboardSummary();
       setData(summary);
-    } catch (error) {
-      console.error('Error loading dashboard:', error);
+    } catch (err: any) {
+      console.error('Error loading dashboard:', err);
+      const msg = err.response?.data?.detail ?? err.message ?? 'Backend unreachable (check CORS or URL)';
+      setError(typeof msg === 'string' ? msg : JSON.stringify(msg));
     } finally {
       setLoading(false);
     }
@@ -55,6 +60,11 @@ export default function Dashboard() {
           Dashboard
         </Typography>
         <Typography color="error">Failed to load dashboard data</Typography>
+        {error && (
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            {error}
+          </Typography>
+        )}
       </Box>
     );
   }

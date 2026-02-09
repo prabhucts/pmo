@@ -7,7 +7,20 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 30000,
 });
+
+// Surface API errors for UI
+api.interceptors.response.use(
+  (res) => res,
+  (err) => {
+    const msg = err.response?.data?.detail || err.message || 'Request failed';
+    if (err.response?.status === 0 || err.code === 'ERR_NETWORK') {
+      console.error('API unreachable (CORS or network). Backend:', API_BASE_URL);
+    }
+    return Promise.reject(err);
+  }
+);
 
 // Dashboard API
 export const getDashboardSummary = async () => {

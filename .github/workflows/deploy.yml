@@ -59,7 +59,7 @@ jobs:
             --platform managed \
             --region ${{ env.GCP_REGION }} \
             --allow-unauthenticated \
-            --set-env-vars OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }},SECRET_KEY=${{ secrets.SECRET_KEY }},ALLOWED_ORIGINS=https://pmo-mng-tool.com \
+            --set-env-vars "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }},SECRET_KEY=${{ secrets.SECRET_KEY }},ALLOWED_ORIGINS=*" \
             --memory 2Gi \
             --cpu 2 \
             --timeout 300
