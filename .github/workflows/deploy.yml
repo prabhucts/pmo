@@ -32,9 +32,7 @@ jobs:
         with:
           project_id: ${{ env.GCP_PROJECT_ID }}
 
-      - name: Enable Artifact Registry API
-        run: gcloud services enable artifactregistry.googleapis.com --quiet
-
+      # Artifact Registry API must be enabled once by a project Owner (one-time setup)
       - name: Ensure Artifact Registry repo exists
         run: |
           gcloud artifacts repositories describe pmo --location=${{ env.GCP_REGION }} 2>/dev/null || \
