@@ -106,7 +106,7 @@ Place custom data in `data/` or upload via the UI:
 ## Repository & Deployment
 
 - **GitHub repo**: [pmo_project](https://github.com/YOUR_USERNAME/pmo_project) – push this codebase to a new repo named `pmo_project`.
-- **GCP deployment**: Deploy to Google Cloud project **pmo-project** (Cloud Run). Custom domain: **https://pmo-mng-tool.com** for the UI.
+- **GCP deployment**: Deploy to Google Cloud project **pmo-project-2026** (Cloud Run). Custom domain: **https://pmo-mng-tool.com** for the UI.
 - See **[DEPLOYMENT.md](DEPLOYMENT.md)** for:
   - Creating the GitHub repository
   - GCP project setup and Cloud Run deploy

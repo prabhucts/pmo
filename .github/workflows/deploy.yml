@@ -8,8 +8,10 @@ on:
   workflow_dispatch:
 
 env:
-  GCP_PROJECT_ID: pmo-project
+  GCP_PROJECT_ID: pmo-project-2026
   GCP_REGION: us-central1
+  # Artifact Registry (replaces deprecated Container Registry / gcr.io)
+  AR_REGISTRY: ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/pmo
 
 jobs:
   deploy:
@@ -17,37 +19,41 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v1
+        uses: google-github-actions/setup-gcloud@v2
         with:
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           project_id: ${{ env.GCP_PROJECT_ID }}
           export_default_credentials: true
 
-      - name: Configure Docker for GCR
+      - name: Enable Artifact Registry API
+        run: gcloud services enable artifactregistry.googleapis.com --quiet
+
+      - name: Ensure Artifact Registry repo exists
         run: |
-          gcloud auth configure-docker
+          gcloud artifacts repositories describe pmo --location=${{ env.GCP_REGION }} 2>/dev/null || \
+          gcloud artifacts repositories create pmo \
+            --repository-format=docker \
+            --location=${{ env.GCP_REGION }} \
+            --description="PMO containers"
+
+      - name: Configure Docker for Artifact Registry
+        run: |
+          gcloud auth configure-docker ${{ env.GCP_REGION }}-docker.pkg.dev --quiet
 
       - name: Build and Push Backend
         run: |
-          docker build -t gcr.io/${{ env.GCP_PROJECT_ID }}/pmo-backend:${{ github.sha }} ./backend
-          docker tag gcr.io/${{ env.GCP_PROJECT_ID }}/pmo-backend:${{ github.sha }} gcr.io/${{ env.GCP_PROJECT_ID }}/pmo-backend:latest
-          docker push gcr.io/${{ env.GCP_PROJECT_ID }}/pmo-backend:${{ github.sha }}
-          docker push gcr.io/${{ env.GCP_PROJECT_ID }}/pmo-backend:latest
-
-      - name: Build and Push Frontend
-        run: |
-          docker build -t gcr.io/${{ env.GCP_PROJECT_ID }}/pmo-frontend:${{ github.sha }} ./frontend
-          docker tag gcr.io/${{ env.GCP_PROJECT_ID }}/pmo-frontend:${{ github.sha }} gcr.io/${{ env.GCP_PROJECT_ID }}/pmo-frontend:latest
-          docker push gcr.io/${{ env.GCP_PROJECT_ID }}/pmo-frontend:${{ github.sha }}
-          docker push gcr.io/${{ env.GCP_PROJECT_ID }}/pmo-frontend:latest
+          docker build -t ${{ env.AR_REGISTRY }}/pmo-backend:${{ github.sha }} ./backend
+          docker tag ${{ env.AR_REGISTRY }}/pmo-backend:${{ github.sha }} ${{ env.AR_REGISTRY }}/pmo-backend:latest
+          docker push ${{ env.AR_REGISTRY }}/pmo-backend:${{ github.sha }}
+          docker push ${{ env.AR_REGISTRY }}/pmo-backend:latest
 
       - name: Deploy Backend to Cloud Run
         run: |
           gcloud run deploy pmo-backend \
-            --image gcr.io/${{ env.GCP_PROJECT_ID }}/pmo-backend:${{ github.sha }} \
+            --image ${{ env.AR_REGISTRY }}/pmo-backend:${{ github.sha }} \
             --platform managed \
             --region ${{ env.GCP_REGION }} \
             --allow-unauthenticated \
@@ -56,10 +62,27 @@ jobs:
             --cpu 2 \
             --timeout 300
 
+      - name: Get Backend URL for frontend build
+        id: backend-url
+        run: |
+          BACKEND_URL=$(gcloud run services describe pmo-backend --region ${{ env.GCP_REGION }} --format 'value(status.url)')
+          echo "url=${BACKEND_URL}/api" >> $GITHUB_OUTPUT
+          echo "Backend API URL: ${BACKEND_URL}/api"
+
+      - name: Build and Push Frontend
+        env:
+          REACT_APP_API_URL: ${{ steps.backend-url.outputs.url }}
+        run: |
+          docker build --build-arg REACT_APP_API_URL=${{ steps.backend-url.outputs.url }} \
+            -t ${{ env.AR_REGISTRY }}/pmo-frontend:${{ github.sha }} ./frontend
+          docker tag ${{ env.AR_REGISTRY }}/pmo-frontend:${{ github.sha }} ${{ env.AR_REGISTRY }}/pmo-frontend:latest
+          docker push ${{ env.AR_REGISTRY }}/pmo-frontend:${{ github.sha }}
+          docker push ${{ env.AR_REGISTRY }}/pmo-frontend:latest
+
       - name: Deploy Frontend to Cloud Run
         run: |
           gcloud run deploy pmo-frontend \
-            --image gcr.io/${{ env.GCP_PROJECT_ID }}/pmo-frontend:${{ github.sha }} \
+            --image ${{ env.AR_REGISTRY }}/pmo-frontend:${{ github.sha }} \
             --platform managed \
             --region ${{ env.GCP_REGION }} \
             --allow-unauthenticated \

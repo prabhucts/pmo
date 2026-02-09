@@ -1,6 +1,6 @@
 # PMO Operations Solution – Deployment Guide
 
-This guide covers deploying the PMO application to **Google Cloud Platform (GCP)** project **pmo-project**, with the UI served at **https://pmo-mng-tool.com**.
+This guide covers deploying the PMO application to **Google Cloud Platform (GCP)** project **pmo-project-2026**, with the UI served at **https://pmo-mng-tool.com**.
 
 ---
 
@@ -26,7 +26,9 @@ Replace `YOUR_GITHUB_USERNAME` with your GitHub username or org.
 
 ---
 
-## 2. GCP Project Setup (pmo-project)
+## 2. GCP Project Setup (pmo-project-2026)
+
+Use GCP project **pmo-project-2026** (project ID: `pmo-project-2026`) for all deploy and CI/CD.
 
 ### Enable APIs and set project
 
@@ -35,11 +37,11 @@ Replace `YOUR_GITHUB_USERNAME` with your GitHub username or org.
 
 # Login and set project
 gcloud auth login
-gcloud config set project pmo-project
+gcloud config set project pmo-project-2026
 
-# Enable required APIs
+# Enable required APIs (Artifact Registry replaces deprecated Container Registry)
 gcloud services enable run.googleapis.com
-gcloud services enable containerregistry.googleapis.com
+gcloud services enable artifactregistry.googleapis.com
 gcloud services enable cloudbuild.googleapis.com
 gcloud services enable sqladmin.googleapis.com   # if using Cloud SQL later
 ```
@@ -51,22 +53,22 @@ gcloud services enable sqladmin.googleapis.com   # if using Cloud SQL later
 gcloud iam service-accounts create pmo-deploy \
   --display-name "PMO Deploy"
 
-# Grant roles
-gcloud projects add-iam-policy-binding pmo-project \
-  --member="serviceAccount:pmo-deploy@pmo-project.iam.gserviceaccount.com" \
+# Grant roles (include Artifact Registry for pushing images)
+gcloud projects add-iam-policy-binding pmo-project-2026 \
+  --member="serviceAccount:pmo-deploy@pmo-project-2026.iam.gserviceaccount.com" \
   --role="roles/run.admin"
 
-gcloud projects add-iam-policy-binding pmo-project \
-  --member="serviceAccount:pmo-deploy@pmo-project.iam.gserviceaccount.com" \
-  --role="roles/storage.admin"
+gcloud projects add-iam-policy-binding pmo-project-2026 \
+  --member="serviceAccount:pmo-deploy@pmo-project-2026.iam.gserviceaccount.com" \
+  --role="roles/artifactregistry.admin"
 
-gcloud projects add-iam-policy-binding pmo-project \
-  --member="serviceAccount:pmo-deploy@pmo-project.iam.gserviceaccount.com" \
+gcloud projects add-iam-policy-binding pmo-project-2026 \
+  --member="serviceAccount:pmo-deploy@pmo-project-2026.iam.gserviceaccount.com" \
   --role="roles/iam.serviceAccountUser"
 
-# Create key and save as GitHub secret GCP_SA_KEY (base64 or JSON content)
+# Create key and save as GitHub secret GCP_SA_KEY (JSON content)
 gcloud iam service-accounts keys create key.json \
-  --iam-account=pmo-deploy@pmo-project.iam.gserviceaccount.com
+  --iam-account=pmo-deploy@pmo-project-2026.iam.gserviceaccount.com
 # Add key content as GitHub secret: GCP_SA_KEY (and optionally OPENAI_API_KEY, SECRET_KEY)
 ```
 
@@ -74,19 +76,27 @@ gcloud iam service-accounts keys create key.json \
 
 ## 3. Build and Deploy to Cloud Run
 
+**Note:** This project uses **Artifact Registry** (`REGION-docker.pkg.dev/PROJECT/repo`) instead of the deprecated Container Registry (gcr.io).
+
 ### Backend
 
-Build and deploy from the **repository root** (so `backend/` is the build context):
+Ensure the Artifact Registry repository exists, then build and deploy from the **repository root**:
 
 ```bash
 cd /Users/prabhu/Documents/pmo
+REGION=us-central1
+AR_REGISTRY="${REGION}-docker.pkg.dev/pmo-project-2026/pmo"
+
+# Create Docker repo if it doesn't exist
+gcloud artifacts repositories describe pmo --location=$REGION 2>/dev/null || \
+  gcloud artifacts repositories create pmo --repository-format=docker --location=$REGION --description="PMO containers"
 
 # Build backend image
-gcloud builds submit --tag gcr.io/pmo-project/pmo-backend ./backend
+gcloud builds submit --tag "${AR_REGISTRY}/pmo-backend:latest" ./backend
 
 # Deploy to Cloud Run
 gcloud run deploy pmo-backend \
-  --image gcr.io/pmo-project/pmo-backend \
+  --image "${AR_REGISTRY}/pmo-backend:latest" \
   --platform managed \
   --region us-central1 \
   --allow-unauthenticated \
@@ -115,27 +125,14 @@ gcloud builds submit ./frontend \
   --config=frontend/cloudbuild-frontend.yaml
 ```
 
-Create `frontend/cloudbuild-frontend.yaml`:
-
-```yaml
-steps:
-  - name: 'gcr.io/cloud-builders/docker'
-    args:
-      - 'build'
-      - '--build-arg'
-      - 'REACT_APP_API_URL=${_BACKEND_URL}'
-      - '-t'
-      - 'gcr.io/$PROJECT_ID/pmo-frontend:latest'
-      - '.'
-substitutions:
-  _BACKEND_URL: 'https://pmo-backend-xxxxx-uc.a.run.app/api'
-```
+The repo uses `frontend/cloudbuild-frontend.yaml` with Artifact Registry image names (`REGION-docker.pkg.dev/PROJECT/pmo/pmo-frontend`).
 
 Then deploy:
 
 ```bash
+AR_REGISTRY="us-central1-docker.pkg.dev/pmo-project-2026/pmo"
 gcloud run deploy pmo-frontend \
-  --image gcr.io/pmo-project/pmo-frontend:latest \
+  --image ${AR_REGISTRY}/pmo-frontend:latest \
   --platform managed \
   --region us-central1 \
   --allow-unauthenticated
@@ -144,10 +141,12 @@ gcloud run deploy pmo-frontend \
 **Option B – Local Docker build**
 
 ```bash
+gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
 cd frontend
-docker build --build-arg REACT_APP_API_URL=https://pmo-backend-xxxxx-uc.a.run.app/api -t gcr.io/pmo-project/pmo-frontend .
-docker push gcr.io/pmo-project/pmo-frontend
-gcloud run deploy pmo-frontend --image gcr.io/pmo-project/pmo-frontend --platform managed --region us-central1 --allow-unauthenticated
+AR_REGISTRY="us-central1-docker.pkg.dev/pmo-project-2026/pmo"
+docker build --build-arg REACT_APP_API_URL=https://pmo-backend-xxxxx-uc.a.run.app/api -t ${AR_REGISTRY}/pmo-frontend:latest .
+docker push ${AR_REGISTRY}/pmo-frontend:latest
+gcloud run deploy pmo-frontend --image ${AR_REGISTRY}/pmo-frontend:latest --platform managed --region us-central1 --allow-unauthenticated
 ```
 
 ---
@@ -210,51 +209,20 @@ No extra step is required for “load current data by default” or template dow
 
 ## 7. Quick Deploy Script (from repo root)
 
-Save as `deploy-gcp.sh` and run from the project root:
+The repo includes `deploy-gcp.sh`, which uses **Artifact Registry** (not gcr.io). From the project root:
 
 ```bash
-#!/bin/bash
-set -e
-PROJECT=pmo-project
-REGION=us-central1
-
-echo "Building backend..."
-gcloud builds submit --tag gcr.io/${PROJECT}/pmo-backend ./backend
-
-echo "Deploying backend..."
-gcloud run deploy pmo-backend \
-  --image gcr.io/${PROJECT}/pmo-backend \
-  --platform managed --region ${REGION} \
-  --allow-unauthenticated \
-  --set-env-vars "OPENAI_API_KEY=${OPENAI_API_KEY},SECRET_KEY=${SECRET_KEY},ALLOWED_ORIGINS=https://pmo-mng-tool.com" \
-  --memory 2Gi --cpu 2
-
-BACKEND_URL=$(gcloud run services describe pmo-backend --region ${REGION} --format 'value(status.url)')
-echo "Backend URL: ${BACKEND_URL}"
-
-echo "Building frontend with API URL: ${BACKEND_URL}/api"
-cd frontend
-docker build --build-arg REACT_APP_API_URL=${BACKEND_URL}/api -t gcr.io/${PROJECT}/pmo-frontend .
-docker push gcr.io/${PROJECT}/pmo-frontend
-cd ..
-
-echo "Deploying frontend..."
-gcloud run deploy pmo-frontend \
-  --image gcr.io/${PROJECT}/pmo-frontend \
-  --platform managed --region ${REGION} \
-  --allow-unauthenticated
-
-echo "Done. Map pmo-mng-tool.com to pmo-frontend in Cloud Run → Manage custom domains."
+OPENAI_API_KEY=... SECRET_KEY=... ./deploy-gcp.sh
 ```
 
-Run: `OPENAI_API_KEY=... SECRET_KEY=... ./deploy-gcp.sh`
+The script creates the Artifact Registry repo `pmo` if needed, builds and pushes images to `REGION-docker.pkg.dev/pmo-project-2026/pmo`, and deploys both services to Cloud Run.
 
 ---
 
 ## 8. Checklist
 
 - [ ] GitHub repo `pmo_project` created and code pushed
-- [ ] GCP project `pmo-project` set and APIs enabled
+- [ ] GCP project `pmo-project-2026` set and APIs enabled
 - [ ] Backend built and deployed to Cloud Run; URL noted
 - [ ] Frontend built with `REACT_APP_API_URL=<backend-url>/api` and deployed to Cloud Run
 - [ ] Domain **pmo-mng-tool.com** verified and mapped to **pmo-frontend** in Cloud Run
