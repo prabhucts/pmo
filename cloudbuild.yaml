@@ -1,32 +1,52 @@
 # Google Cloud Build configuration for CI/CD
+# Uses Artifact Registry (region-docker.pkg.dev), not deprecated gcr.io
+substitutions:
+  _REGION: us-central1
+  _AR_REGISTRY: us-central1-docker.pkg.dev/${PROJECT_ID}/pmo
+
 steps:
+  # Ensure Artifact Registry repo exists (create if missing)
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        gcloud artifacts repositories describe pmo --location=${_REGION} 2>/dev/null || \
+        gcloud artifacts repositories create pmo \
+          --repository-format=docker \
+          --location=${_REGION} \
+          --description="PMO containers"
+    id: 'ensure-repo'
+
   # Build backend image
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'build'
       - '-t'
-      - 'gcr.io/$PROJECT_ID/pmo-backend:$COMMIT_SHA'
+      - '${_AR_REGISTRY}/pmo-backend:$COMMIT_SHA'
       - '-t'
-      - 'gcr.io/$PROJECT_ID/pmo-backend:latest'
+      - '${_AR_REGISTRY}/pmo-backend:latest'
       - './backend'
     id: 'build-backend'
+    waitFor: ['ensure-repo']
 
   # Build frontend image
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'build'
       - '-t'
-      - 'gcr.io/$PROJECT_ID/pmo-frontend:$COMMIT_SHA'
+      - '${_AR_REGISTRY}/pmo-frontend:$COMMIT_SHA'
       - '-t'
-      - 'gcr.io/$PROJECT_ID/pmo-frontend:latest'
+      - '${_AR_REGISTRY}/pmo-frontend:latest'
       - './frontend'
     id: 'build-frontend'
+    waitFor: ['ensure-repo']
 
   # Push backend image
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
-      - 'gcr.io/$PROJECT_ID/pmo-backend:$COMMIT_SHA'
+      - '${_AR_REGISTRY}/pmo-backend:$COMMIT_SHA'
     id: 'push-backend'
     waitFor: ['build-backend']
 
@@ -34,7 +54,7 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
-      - 'gcr.io/$PROJECT_ID/pmo-frontend:$COMMIT_SHA'
+      - '${_AR_REGISTRY}/pmo-frontend:$COMMIT_SHA'
     id: 'push-frontend'
     waitFor: ['build-frontend']
 
@@ -46,9 +66,9 @@ steps:
       - 'deploy'
       - 'pmo-backend'
       - '--image'
-      - 'gcr.io/$PROJECT_ID/pmo-backend:$COMMIT_SHA'
+      - '${_AR_REGISTRY}/pmo-backend:$COMMIT_SHA'
       - '--region'
-      - 'us-central1'
+      - '${_REGION}'
       - '--platform'
       - 'managed'
       - '--allow-unauthenticated'
@@ -65,9 +85,9 @@ steps:
       - 'deploy'
       - 'pmo-frontend'
       - '--image'
-      - 'gcr.io/$PROJECT_ID/pmo-frontend:$COMMIT_SHA'
+      - '${_AR_REGISTRY}/pmo-frontend:$COMMIT_SHA'
       - '--region'
-      - 'us-central1'
+      - '${_REGION}'
       - '--platform'
       - 'managed'
       - '--allow-unauthenticated'
@@ -75,10 +95,10 @@ steps:
     waitFor: ['push-frontend', 'deploy-backend']
 
 images:
-  - 'gcr.io/$PROJECT_ID/pmo-backend:$COMMIT_SHA'
-  - 'gcr.io/$PROJECT_ID/pmo-backend:latest'
-  - 'gcr.io/$PROJECT_ID/pmo-frontend:$COMMIT_SHA'
-  - 'gcr.io/$PROJECT_ID/pmo-frontend:latest'
+  - '${_AR_REGISTRY}/pmo-backend:$COMMIT_SHA'
+  - '${_AR_REGISTRY}/pmo-backend:latest'
+  - '${_AR_REGISTRY}/pmo-frontend:$COMMIT_SHA'
+  - '${_AR_REGISTRY}/pmo-frontend:latest'
 
 options:
   machineType: 'N1_HIGHCPU_8'
