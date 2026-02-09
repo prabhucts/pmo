@@ -1,0 +1,14 @@
+Formatted ID,Name,State,Percent Done By Story Plan Estimate,Percent Done By Story Count,Project,Owner,Preliminary Estimate,Tags,Parent
+E26575,EPIC TDC data to GCP,Implementing,0,0,PLSST Solution Train,Priya Patel,M,"CDP;R&A;2026",Theme T4440: ITPR080952 - Metabolic Health Revamp Program
+E26641,ODS ETL Migration to Cloud - 2026,Portfolio Backlog,0,0,CDP Train (Product Config & Data Platform),James Okorn,L,Data Platform;2026,Theme T4248: ITPR078922 - PLSS RTB-2025 ODS ETL Migration to Cloud
+E27362,Reporting Portal Platform Consolidation,Funnel,0,0,R&A Train (Reporting & Analytics),Priya Patel,M,2026;Reporting Platform,Theme T4426: ITPR082135 - AHM RTB - Data Platform & Config
+E27363,LCC - Ensuring Care Plan Consistency: DGI Fixes and Language Updates,Implementing,25,30,PLSST Solution Train,Prakash Mohan,M,LCC;2026,Theme T4419: ITPR082124 - AHM RTB - LCC Enhancements
+E27364,AHM Epic Upgrades: Enhancing Workflows Through Bi-Annual Ingests,Implementing,15,20,PLSST Solution Train,Prakash Mohan,L,LCC;2026,Theme T4419: ITPR082124 - AHM RTB - LCC Enhancements
+E27382,Remote Connect Program Questionnaire Integration in Modern My Active Health,Analyzing,0,0,PLSST Solution Train,Prakash Mohan,M,"UX;CDP;DP;LCC;IO;R&A;CM;2026",Theme T4414: ITPR082125 - AHM RTB - MAH Member Experience Enhancements
+E27383,Empowering Health: Enhancing LCC AHI Model with Data-Driven Personalization,Analyzing,0,0,PLSST Solution Train,Prakash Mohan,M,"CDP;A&BC;LCC;IO;R&A;CM;2026",Theme T4414: ITPR082125 - AHM RTB - MAH Member Experience Enhancements
+E27437,Clinical Targeting Platform - Enhancement to standardized clinical framework,Implementing,45,55,CDP Train (Product Config & Data Platform),Arun Shivashankar Kumar,L,CDP;2026,Theme T4426: ITPR082135 - AHM RTB - Data Platform & Config
+E27617,MyActiveHealth - New Capabilities / Enhancement of existing capabilities,Implementing,60,65,PLSST Solution Train,Swati Patruni,XL,"UX;MAH;2026",Theme T4414: ITPR082125 - AHM RTB - MAH Member Experience Enhancements
+E23659,Member Experience Enhancements,Completed,100,100,PLSST Solution Train,Shikha Puri,M,Member;2025,Theme T4414: ITPR082125 - AHM RTB - MAH Member Experience Enhancements
+E27500,TMV Platform Enhancements and Modernization,Implementing,35,40,PLSST Solution Train,Kirti Kewalramani,L,TMV;2026,Theme T4416: ITPR082127 - AHM RTB - TMV KTLO
+E27600,L3 Production Support and Defect Management,Implementing,70,75,PLSST Solution Train,Multiple Owners,XL,L3;Support;2026,Theme T4436: ITPR082148 - AHM L3 - MAH
+E27700,Data Migration and Cloud Transformation,Implementing,50,55,PLSST Solution Train,Jeff Congdon,XL,Cloud;Migration;2026,Theme T4426: ITPR082135 - AHM RTB - Data Platform & Config

@@ -1,0 +1,23 @@
+# Build frontend with backend API URL (set via substitution or default)
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '--build-arg'
+      - 'REACT_APP_API_URL=${_BACKEND_URL}'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/pmo-frontend:$COMMIT_SHA'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/pmo-frontend:latest'
+      - '.'
+    id: 'build-frontend'
+
+images:
+  - 'gcr.io/$PROJECT_ID/pmo-frontend:$COMMIT_SHA'
+  - 'gcr.io/$PROJECT_ID/pmo-frontend:latest'
+
+substitutions:
+  _BACKEND_URL: 'https://pmo-backend-xxxxx-uc.a.run.app/api'
+
+options:
+  logging: CLOUD_LOGGING_ONLY

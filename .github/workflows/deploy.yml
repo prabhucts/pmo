@@ -1,0 +1,74 @@
+name: Deploy to GCP
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+env:
+  GCP_PROJECT_ID: pmo-project
+  GCP_REGION: us-central1
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          project_id: ${{ env.GCP_PROJECT_ID }}
+          export_default_credentials: true
+
+      - name: Configure Docker for GCR
+        run: |
+          gcloud auth configure-docker
+
+      - name: Build and Push Backend
+        run: |
+          docker build -t gcr.io/${{ env.GCP_PROJECT_ID }}/pmo-backend:${{ github.sha }} ./backend
+          docker tag gcr.io/${{ env.GCP_PROJECT_ID }}/pmo-backend:${{ github.sha }} gcr.io/${{ env.GCP_PROJECT_ID }}/pmo-backend:latest
+          docker push gcr.io/${{ env.GCP_PROJECT_ID }}/pmo-backend:${{ github.sha }}
+          docker push gcr.io/${{ env.GCP_PROJECT_ID }}/pmo-backend:latest
+
+      - name: Build and Push Frontend
+        run: |
+          docker build -t gcr.io/${{ env.GCP_PROJECT_ID }}/pmo-frontend:${{ github.sha }} ./frontend
+          docker tag gcr.io/${{ env.GCP_PROJECT_ID }}/pmo-frontend:${{ github.sha }} gcr.io/${{ env.GCP_PROJECT_ID }}/pmo-frontend:latest
+          docker push gcr.io/${{ env.GCP_PROJECT_ID }}/pmo-frontend:${{ github.sha }}
+          docker push gcr.io/${{ env.GCP_PROJECT_ID }}/pmo-frontend:latest
+
+      - name: Deploy Backend to Cloud Run
+        run: |
+          gcloud run deploy pmo-backend \
+            --image gcr.io/${{ env.GCP_PROJECT_ID }}/pmo-backend:${{ github.sha }} \
+            --platform managed \
+            --region ${{ env.GCP_REGION }} \
+            --allow-unauthenticated \
+            --set-env-vars OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }},SECRET_KEY=${{ secrets.SECRET_KEY }},ALLOWED_ORIGINS=https://pmo-mng-tool.com \
+            --memory 2Gi \
+            --cpu 2 \
+            --timeout 300
+
+      - name: Deploy Frontend to Cloud Run
+        run: |
+          gcloud run deploy pmo-frontend \
+            --image gcr.io/${{ env.GCP_PROJECT_ID }}/pmo-frontend:${{ github.sha }} \
+            --platform managed \
+            --region ${{ env.GCP_REGION }} \
+            --allow-unauthenticated \
+            --memory 512Mi \
+            --cpu 1
+
+      - name: Get Service URLs
+        run: |
+          echo "Backend URL:"
+          gcloud run services describe pmo-backend --region ${{ env.GCP_REGION }} --format 'value(status.url)'
+          echo "Frontend URL:"
+          gcloud run services describe pmo-frontend --region ${{ env.GCP_REGION }} --format 'value(status.url)'

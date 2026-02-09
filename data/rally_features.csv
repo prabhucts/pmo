@@ -1,0 +1,29 @@
+Formatted ID,Name,Owner,Parent,Project,Release,State
+F214458,Client Commitment 3/1: Custom Message to client's population,Alex Alistratov,Epic E27437: Clinical Targeting Platform - Enhancement to standardized clinical framework,PLSST Solution Train,2026.Jan,Implementing
+F223347,Score application migration to Cloud - Savings and Compliance Review (SCORE),Junaid Ahmed,Epic E27437: Clinical Targeting Platform - Enhancement to standardized clinical framework,PLSST Solution Train,2026.Jan,Implementing
+F228669,Address Member data discrepancies between ODS and GCP - Effective Start/End Date,Arun Shivashankar Kumar,Epic E27437: Clinical Targeting Platform - Enhancement to standardized clinical framework,CDP Train (Product Config & Data Platform),2026.Jan,Implementing
+F227595,Volume comparison for CE powered products - GCP vs OnPrem,Nischal Chhetri,Epic E27437: Clinical Targeting Platform - Enhancement to standardized clinical framework,PLSST Solution Train,2026.Jan,Planning
+F226087,Provisioning Account Managers with access to production test accounts for MMAH application,Swati Patruni,Epic E27617: MyActiveHealth - New Capabilities / Enhancement of existing capabilities,PLSST Solution Train,2026.Jan,Implementing
+F227933,Member engagement data from Epic to GCP & Setup consumable view for PLSS Reporting,Chitra Venkatasamy,Epic E27437: Clinical Targeting Platform - Enhancement to standardized clinical framework,PLSST Solution Train,2026.Jan,Implementing
+F227369,PLSST Data Platform L3 Production Defect Support Only - No Enhancements allowed in this Feature,Multiple Owners,Epic E27600: L3 Production Support and Defect Management,PLSST Solution Train,2026.Jan,Active
+F227424,Performance Improvements - Shared APIs,Chanduru Sampathkumar,Epic E27617: MyActiveHealth - New Capabilities / Enhancement of existing capabilities,PLSST Solution Train,2026.Jan,Implementing
+F227673,Migrate EPH Adapter to GCP,Anupama Retnadev,Epic E27700: Data Migration and Cloud Transformation,PLSST Solution Train,2026.Jan,Implementing
+F227423,Address Vulnerabilities - Shared APIs,Vivek Janaki,Epic E27617: MyActiveHealth - New Capabilities / Enhancement of existing capabilities,PLSST Solution Train,2026.Jan,Implementing
+F228611,(Jaguars 2026) PSA processing towards stabilization Copy PSA reference data from prod to PSA lower env.,Rajesh Lakshmipathy,Epic E27700: Data Migration and Cloud Transformation,PLSST Solution Train,2026.Jan,Planning
+F226885,Support : CloudSQL DB & BQ - 2026,Uzeer Mohammed,Epic E27437: Clinical Targeting Platform - Enhancement to standardized clinical framework,PLSST Solution Train,2026.Jan,Active
+F229402,Compare the tables in on-prem & GCP and list out missing columns - Implementation (Pending items),Mahalakshmi Naganathan,Epic E27700: Data Migration and Cloud Transformation,PLSST Solution Train,2026.Feb,Planning
+F228287,ODS to PG data sync : Test/Validation framework - Enhance with more use cases,Ashwin Kattula,Epic E27437: Clinical Targeting Platform - Enhancement to standardized clinical framework,PLSST Solution Train,2026.Jan,Implementing
+F180430,Data Encryption for Member PII Data in Prod Using Latest Version [Voltage 3.1],Bipin Byreddy,Epic E27700: Data Migration and Cloud Transformation,PLSST Solution Train,2026.Jan,Implementing
+F229745,PSA: Purge R and N indicator behavior enhancement in framework - 2026,Sunil Nando,Epic E27700: Data Migration and Cloud Transformation,PLSST Solution Train,2026.Jan,Implementing
+F227640,TMV Enhancements,Prabhakaran Manokaran,Epic E27500: TMV Platform Enhancements and Modernization,PLSST Solution Train,2026.Jan,Implementing
+F221233,Custom or Points or Hearts or Dollar Incentive Program & Gamification enablement,Lokesh Sundharamoorthy,Epic E27617: MyActiveHealth - New Capabilities / Enhancement of existing capabilities,PLSST Solution Train,2026.Jan,Implementing
+F228901,Informatica: Code Migration for Informatica On-prem CRS_INBOUND INCENTIVES and DAILY BIO WORKFLOWS,Deepak Navale,Epic E27700: Data Migration and Cloud Transformation,PLSST Solution Train,2026.Jan,Implementing
+F228498,Supplier level HRA Q&A configuration,Vivek Janaki,Epic E27617: MyActiveHealth - New Capabilities / Enhancement of existing capabilities,PLSST Solution Train,2026.Jan,Planning
+F224829,EPIC Intake requests CRs and adhoc requests,Jose Martinez,Epic E27700: Data Migration and Cloud Transformation,PLSST Solution Train,2026.Jan,Active
+F228366,JPMC Client Request: Custom incentive Rule,Jyothi Kamakshi,Epic E27617: MyActiveHealth - New Capabilities / Enhancement of existing capabilities,PLSST Solution Train,2026.Jan,Planning
+F229748,(Copy of) COMPLIANCE: Setup & Configuration of the IDMC on the New VMs Created As Per the CVS Enterprise Standard - 2026,Sendil Gujjala,Epic E27700: Data Migration and Cloud Transformation,PLSST Solution Train,2026.Jan,Planning
+F229746,(Copy of) Informatica: Code Migration for Informatica On-prem Payor Ingest-AHDI (weekly) PART 3 [E2E] - 2026,Rajesh Lakshmipathy,Epic E27700: Data Migration and Cloud Transformation,PLSST Solution Train,2026.Jan,Planning
+F207298,AHM-RM: PDC Migration to Azure,Lavanya Tamarapalli,Epic E27700: Data Migration and Cloud Transformation,PLSST Solution Train,2026.Jan,Implementing
+F229301,Call Interaction Log,Rajesh K,Epic E27437: Clinical Targeting Platform - Enhancement to standardized clinical framework,PLSST Solution Train,2026.Jan,Planning
+F191573,(Jaguars 2026) Creation of a holding tank in PSA for minimizing additional Supplier Creation,Manav Bhatia,Epic E27700: Data Migration and Cloud Transformation,PLSST Solution Train,2026.Jan,Planning
+F219346,Incentive Stabilization : Completion Date and Claim Reversal Related Data consistency for Third party activities,Shikha Puri,Epic E23659: Member Experience Enhancements,PLSST Solution Train,2025.PI4,Completed
