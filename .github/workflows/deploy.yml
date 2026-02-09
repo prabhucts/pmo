@@ -16,8 +16,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      # Artifact Registry (replaces deprecated Container Registry / gcr.io)
-      AR_REGISTRY: ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/pmo
+      AR_REGISTRY: us-central1-docker.pkg.dev/pmo-project-2026/pmo
 
     steps:
       - name: Checkout code
