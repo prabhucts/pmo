@@ -33,8 +33,8 @@ COPY --from=builder /app/build /usr/share/nginx/html
 
 # Template downloads are served by the backend API; no need to copy here
 
-# Expose port
-EXPOSE 80
+# Cloud Run uses PORT=8080 by default
+EXPOSE 8080
 
 # Start nginx
 CMD ["nginx", "-g", "daemon off;"]
